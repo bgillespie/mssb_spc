@@ -1,0 +1,17 @@
+# My env-vars
+.env
+
+# Jupyter
+Notebooks
+.ipynb_checkpoints
+
+# PyCharm
+.idea
+*.iml
+
+# Pytest
+.pytest_cache
+__pycache__
+
+# Coverage
+.coverage
