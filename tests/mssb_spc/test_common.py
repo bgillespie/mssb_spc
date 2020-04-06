@@ -1,6 +1,9 @@
+from datetime import date
+
 import pytest
 
 from mssb_spc.common import *
+from mssb_spc.error import *
 
 
 def test_str_us_to_date():
@@ -84,6 +87,10 @@ def test_split_table_at_heading():
         [1, 2, 3, 4],
         [5, 6, 7, 8],
     ]
+
+    with pytest.raises(CellNotFoundError):
+        list(split_table_at_heading(table, 'Q'))
+
     expected = [
         ([1, 2], [3, 4]),
         ([5, 6], [7, 8]),

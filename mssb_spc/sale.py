@@ -1,10 +1,12 @@
 from typing import Iterable, MutableMapping
+
+import pyexcel
+
 from .common import \
     Table, Row, Cell,\
     xlate_kv, rows_same_width, without_empty_columns,\
     to_single_table, split_table_at_heading
-
-import pyexcel
+from .error import SaleSheetParseError
 
 
 #
@@ -42,6 +44,8 @@ def sales_table_to_dict(table: Table) -> MutableMapping[str, Cell]:
 def sale_sheet_to_dict(sheet: pyexcel.Sheet) -> MutableMapping[str, Cell]:
     """ Conversion of a PyExcel Sheet representing a sale to a dict. """
     rows = sale_sheet_relevant_rows(sheet.rows())
+    if not rows:
+        raise SaleSheetParseError("Sale data couldn't be isolated")
     rows = rows_same_width(rows)
     rows = without_empty_columns(rows)
     table = to_single_table(split_table_at_heading(rows, 'Proceeds Details'))

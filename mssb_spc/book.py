@@ -5,6 +5,7 @@ from .sale import sale_sheet_to_dict
 from .espp import espp_sheet_to_espps
 from .rsu import rsu_sheet_to_rsus
 from .common import PlanType
+from .error import BookParseError, SaleSheetParseError
 
 
 def book_to_sale(book: pyexcel.Book) -> MutableMapping:
@@ -12,6 +13,8 @@ def book_to_sale(book: pyexcel.Book) -> MutableMapping:
 
     :param book: the loaded workbook
     :return: all the data relevant to the sale.
+    :raises BookParseError: if sale type couldn't be determined.
+    :raises SaleSheetParseError: if first sheet couldn't be parsed as a sale.
     """
     # Convert the sale sheet
     sale_sheet = book.sheet_by_index(0)
@@ -24,7 +27,7 @@ def book_to_sale(book: pyexcel.Book) -> MutableMapping:
         espp_sheet = book.sheet_by_index(1)
         sale['espps'] = espp_sheet_to_espps(espp_sheet)
     else:
-        raise ValueError("Couldn't determine sale type of book")
+        raise BookParseError("Couldn't determine sale type of book")
 
     return sale
 

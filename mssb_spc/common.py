@@ -1,14 +1,16 @@
 from typing import Union, Optional, Iterable, Iterator, List, Tuple, Mapping
 from decimal import Decimal, InvalidOperation
-from datetime import date, datetime as dt
+from datetime import date as Date, datetime as DateTime
 from re import compile as Re, sub as re_sub
 from warnings import warn
 import enum
 
 from dictionaries import FrozenOrderedDict, FrozenDict
 
+from .error import CellNotFoundError
+
 # typedefs
-Cell = Union[str, int, Decimal, date]  # this is what can be in any table cell
+Cell = Union[str, int, Decimal, Date]  # this is what can be in any table cell
 Row = List[Optional[Cell]]             # this is how a row is made up
 Table = List[Row]                      # a table is an ordered list of rows
 Currency = Decimal                     # Just use a simple Decimal for now
@@ -54,14 +56,14 @@ class PlanType(enum.Enum):
 # TRANSLATORS
 #
 
-def str_us_to_date(us_date_str: str) -> date:
+def str_us_to_date(us_date_str: str) -> Date:
     """ Convert a US-format date string to a date object. """
-    return dt.strptime(us_date_str, STRF_US_DT).date()
+    return DateTime.strptime(us_date_str, STRF_US_DT).date()
 
 
-def str_iso_to_date(iso_date_str: str) -> date:
+def str_iso_to_date(iso_date_str: str) -> Date:
     """ Convert an ISO-format date string to a date object. """
-    return dt.strptime(iso_date_str, STRF_ISO_DT).date()
+    return DateTime.strptime(iso_date_str, STRF_ISO_DT).date()
 
 
 def currency(c: float) -> Optional[Currency]:
@@ -182,12 +184,16 @@ def split_table_at_heading(table: Table, heading: str, remove_heading=True) \
     :param remove_heading: throw away the first row?
     :return: iterator over 2-tuple of rows from each separated table.
     """
-    table = iter(table)
-    row = next(table)
+    table_iter = iter(table)
+    row = next(table_iter)
+    if heading not in row:
+        raise CellNotFoundError(
+            f"Couldn't find column named '{heading}'"
+        )
     col_index = row.index(heading)
     if not remove_heading:
         yield row[:col_index], row[col_index:]
-    for row in table:
+    for row in table_iter:
         yield row[:col_index], row[col_index:]
 
 
